@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BacktestLab by CA Sunil Kumar Paswan - educational strategy backtester</title>
+<meta name="description" content="Describe a trading strategy in plain words and backtest it on live crypto and Indian market data. Educational use only. Created by CA Sunil Kumar Paswan, Finance with CA Sunil.">
+<meta property="og:title" content="BacktestLab - educational strategy backtester"><meta property="og:description" content="Plain-words backtesting on live data, with a gallery of real backtest mistakes. By CA Sunil Kumar Paswan. Educational only.">
+<style>
+:root{--bg:#0a100f;--p:#111a18;--p2:#16221f;--b:#223330;--t:#e8f0ee;--m:#8aa09b;--g:#2ecc71;--r:#ff5b6b;--a:#f5b942;--bl:#4db8ff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font:14px/1.5 system-ui,Segoe UI,Roboto,sans-serif;padding-bottom:78px}
+header{display:flex;align-items:center;gap:22px;padding:10px 20px;border-bottom:1px solid var(--b);position:sticky;top:0;background:var(--bg);z-index:5;flex-wrap:wrap}
+.logo{font-weight:700;font-size:18px;line-height:1.2}.logo b{color:var(--g)}.logo small{display:block;font-weight:400;font-size:11px;color:var(--m)}
+nav button{background:none;border:0;color:var(--m);padding:8px 12px;font:inherit;cursor:pointer;border-bottom:2px solid transparent}
+nav button.on{color:var(--t);border-color:var(--g)}
+a{color:var(--bl)}
+main{max-width:1400px;margin:0 auto;padding:16px 20px}
+.grid{display:grid;grid-template-columns:390px 1fr;gap:16px}@media(max-width:980px){.grid{grid-template-columns:1fr}}
+.card{background:var(--p);border:1px solid var(--b);border-radius:12px;padding:14px;margin-bottom:14px}
+h2{font-size:15px;margin:0 0 10px}h3{font-size:13px;margin:12px 0 6px;color:var(--m);text-transform:uppercase;letter-spacing:.04em}
+textarea,input,select{width:100%;background:var(--p2);border:1px solid var(--b);color:var(--t);border-radius:8px;padding:8px;font:inherit}
+textarea{min-height:84px;resize:vertical}label{font-size:12px;color:var(--m);display:block;margin:8px 0 3px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+button.pri{background:var(--g);color:#04110a;border:0;border-radius:8px;padding:9px 14px;font-weight:700;cursor:pointer;width:100%;margin-top:10px}
+button.sec{background:var(--p2);color:var(--t);border:1px solid var(--b);border-radius:8px;padding:7px 12px;cursor:pointer;font:inherit}
+button:disabled{opacity:.5;cursor:wait}
+.chip{display:inline-block;background:var(--p2);border:1px solid var(--b);border-radius:99px;padding:3px 10px;font-size:12px;margin:3px 4px 0 0;cursor:pointer;color:var(--m)}.chip:hover{color:var(--t)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.kpi{background:var(--p2);border-radius:10px;padding:10px}.kpi small{color:var(--m);display:block;font-size:11px}.kpi b{font-size:18px}
+.g{color:var(--g)}.r{color:var(--r)}.m{color:var(--m)}
+canvas{width:100%;height:300px;display:block}
+table{width:100%;border-collapse:collapse;font-size:12px}th,td{text-align:right;padding:5px 8px;border-bottom:1px solid var(--b)}th:first-child,td:first-child{text-align:left}th{color:var(--m);font-weight:500}
+.note{border-left:3px solid var(--b);padding:6px 10px;margin:6px 0;background:var(--p2);border-radius:0 8px 8px 0;font-size:13px}
+.note.bad{border-color:var(--r)}.note.warn{border-color:var(--a)}.note.info{border-color:var(--bl)}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:14px}
+.tag{display:inline-block;font-size:11px;padding:2px 8px;border-radius:99px;background:#2a1a1d;color:#ff9aa5;margin:2px 4px 2px 0}.tag.t{background:#13261f;color:#7be0a8}
+.status{font-size:11px;color:var(--m);border-top:1px dashed var(--b);margin-top:8px;padding-top:6px}
+.legend span{margin-right:14px;font-size:12px;color:var(--m)}.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px}
+footer{position:fixed;bottom:0;left:0;right:0;background:#0d1514;border-top:1px solid var(--b);padding:7px 16px;font-size:11px;color:var(--m);text-align:center}
+#modal{position:fixed;inset:0;background:#000d;display:none;align-items:center;justify-content:center;z-index:20;padding:16px}
+#modal .box{background:var(--p);border:1px solid var(--b);border-radius:14px;max-width:720px;max-height:92vh;overflow:auto;padding:20px}
+.hide{display:none}.credit{border:1px solid var(--b);background:var(--p2);border-radius:10px;padding:10px 12px;font-size:13px}
+</style></head><body>
+<header><div class="logo">Backtest<b>Lab</b><small>by CA Sunil Kumar Paswan &middot; <a href="https://www.youtube.com/@CASunilFinance" target="_blank" rel="noopener">Finance with CA Sunil</a></small></div>
+<nav id="nav"><button data-t="bt" class="on">Backtest</button><button data-t="lib">Strategy Library</button><button data-t="fail">My Failed Backtests</button><button data-t="learn">Disclaimer &amp; Learn</button></nav></header>
+<main>
+<section id="bt"><div class="grid"><div>
+ <div class="card"><h2>1. Describe a strategy in plain words</h2>
+  <textarea id="prompt" placeholder="e.g. Buy BTC when 20 EMA crosses above 50 EMA on 1h, stop loss 2%, target 4%"></textarea>
+  <div id="ex"></div><button class="pri" id="bParse">Auto-correct &amp; understand</button> <button class="sec hide" id="bAI">Understand with Claude (AI)</button><div id="parsed" class="hide"></div></div>
+ <div class="card"><h2>2. Live data &amp; costs</h2>
+  <div class="row"><div><label>Market</label><select id="market"><option value="crypto">Crypto</option><option value="india">Indian index / stocks</option></select></div>
+  <div><label>Instrument</label><select id="symbol"></select></div></div>
+  <div class="row"><div><label>Bar size</label><select id="interval"><option>5m</option><option>15m</option><option selected>1h</option><option>1d</option></select></div>
+  <div><label>Days of history</label><input id="days" type="number" value="365" min="5" max="3650"></div></div>
+  <label>Data source</label><select id="source"></select>
+  <div id="srcNote" class="m" style="font-size:12px;margin-top:6px"></div>
+  <div id="csvBox" class="hide"><label>CSV (time/date, open, high, low, close[, volume])</label><input type="file" id="csv" accept=".csv,text/csv"></div>
+  <div class="row"><div><label>Fee % per side</label><input id="fee" type="number" step="0.01" value="0.05"></div><div><label>Slippage % per side</label><input id="slip" type="number" step="0.01" value="0.05"></div></div>
+  <label>Starting capital</label><input id="cap" type="number" value="100000">
+  <button class="pri" id="bRun">Run backtest on live data</button><div id="err" class="note bad hide"></div></div>
+</div><div id="res"><div class="card m">Results appear here. Describe a strategy or pick one from the library, choose a market, then press <b>Run backtest on live data</b>. Data is fetched in your browser from the exchange or data provider; nothing is sent to any server of this site.</div></div></div></section>
+<section id="lib" class="hide"><div class="cards" id="libCards"></div></section>
+<section id="fail" class="hide"><div class="card"><h2>My Failed Backtests: what went wrong and what I learned</h2>
+ <div class="m">Real mistakes from the strategy research of CA Sunil Kumar Paswan, shown on purpose. Most backtest failures come from how a strategy was measured, not from the strategy itself. Each entry says whether it was confirmed from output or still needs checking.</div></div><div class="cards" id="failCards"></div></section>
+<section id="learn" class="hide"><div class="card"><h2>Important disclaimer</h2><div id="disc"></div></div>
+ <div class="card"><h2>Common backtest mistakes this app tries to flag</h2><div id="mist"></div></div>
+ <div class="card credit"><b>Credit:</b> BacktestLab was created by <b>CA Sunil Kumar Paswan</b> &middot; YouTube: <a href="https://www.youtube.com/@CASunilFinance" target="_blank" rel="noopener">Finance with CA Sunil (@CASunilFinance)</a>. &copy; 2026 CA Sunil Kumar Paswan. You may share this page freely; please keep this credit and the disclaimer intact.</div></section>
+</main>
+<footer>Educational use only. Not investment advice. Not a SEBI-registered Investment Adviser / Research Analyst. Backtests do not predict future results; trading involves risk of loss. &nbsp;|&nbsp; Created by CA Sunil Kumar Paswan &middot; Finance with CA Sunil</footer>
+<div id="modal"><div class="box"><h2>BacktestLab by CA Sunil Kumar Paswan</h2><div id="modalText"></div><label style="display:flex;gap:8px;align-items:flex-start;margin-top:14px;color:var(--t);font-size:13px"><input type="checkbox" id="agree" style="width:auto;margin-top:3px">I have read and understood this disclaimer. I will use this site for education only and not as investment advice.</label><button class="pri" id="accept" disabled>Continue</button></div></div>
+
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+/* ============================ universe ============================ */
+const CRYPTO={BTCUSDT:['btc','bitcoin'],ETHUSDT:['eth','ethereum'],SOLUSDT:['sol','solana'],XRPUSDT:['xrp','ripple'],BNBUSDT:['bnb'],DOGEUSDT:['doge','dogecoin'],LINKUSDT:['link','chainlink']};
+const INDIA={'^NSEI':['nifty','nifty50','nifty 50'],'^NSEBANK':['banknifty','bank nifty'],'^BSESN':['sensex'],'RELIANCE.NS':['reliance'],'TCS.NS':['tcs'],'INFY.NS':['infosys','infy'],'HDFCBANK.NS':['hdfcbank','hdfc bank'],'SBIN.NS':['sbin'],'ICICIBANK.NS':['icicibank','icici bank'],'VEDL.NS':['vedl','vedanta'],'TRENT.NS':['trent'],'COALINDIA.NS':['coalindia','coal india']};
+const DEFAULT_DAYS={'1d':1095,'1h':365,'15m':60,'5m':30};
+const SOURCES={crypto:[['binance','Binance public market data (live)'],['bybit','Bybit public market data (live)'],['csv','My CSV file']],
+ india:[['yahoo','Yahoo Finance via public CORS proxy (live, best effort)'],['csv','My CSV file (most reliable)']]};
+const SRCNOTE={binance:'Fetched directly from Binance in your browser. Some networks block Binance; try Bybit or CSV.',bybit:'Fetched directly from Bybit (linear USDT perpetual candles).',
+ yahoo:'Browsers cannot call Yahoo directly, so this uses free public proxies that can be slow or down. If it fails, export a CSV and use "My CSV file". Yahoo allows only ~60 days of 5m/15m and ~2 years of 1h data.',csv:'Your file is read in your browser and never uploaded.'};
+/* ============================ indicators ============================ */
+const nanArr=n=>new Array(n).fill(NaN);
+function rollMean(a,n){const o=nanArr(a.length);let s=0;for(let i=0;i<a.length;i++){s+=a[i];if(i>=n)s-=a[i-n];if(i>=n-1)o[i]=s/n}return o}
+function rollStd(a,n){const o=nanArr(a.length),m=rollMean(a,n);for(let i=n-1;i<a.length;i++){let v=0;for(let j=i-n+1;j<=i;j++){const d=a[j]-m[i];v+=d*d}o[i]=Math.sqrt(v/(n-1))}return o}
+function ema(a,n){const k=2/(n+1),o=nanArr(a.length);o[0]=a[0];for(let i=1;i<a.length;i++)o[i]=a[i]*k+o[i-1]*(1-k);return o}
+function rsi(c,n){const L=c.length,al=1/n,up=nanArr(L),dn=nanArr(L),o=nanArr(L);
+ for(let i=1;i<L;i++){const d=c[i]-c[i-1],u=Math.max(d,0),w=Math.max(-d,0);up[i]=i===1?u:al*u+(1-al)*up[i-1];dn[i]=i===1?w:al*w+(1-al)*dn[i-1];o[i]=dn[i]===0?100:100-100/(1+up[i]/dn[i])}return o}
+function rollExt(a,n,fn){const o=nanArr(a.length);for(let i=n;i<a.length;i++){let v=a[i-n];for(let j=i-n+1;j<i;j++)v=fn(v,a[j]);o[i]=v}return o}
+function ind(df,tok){const f=parseFloat(tok);if(!isNaN(f)&&/^-?\d+(\.\d+)?$/.test(String(tok).trim()))return f;
+ const m=String(tok).trim().toLowerCase().match(/^(\w+)(?:\((\d+)\))?$/);if(!m)throw new Error("Bad indicator '"+tok+"'");const name=m[1],n=parseInt(m[2]||'0'),c=df.c;
+ if(name==='open')return df.o;if(name==='high')return df.h;if(name==='low')return df.l;if(name==='close')return df.c;if(name==='volume')return df.v;
+ if(n<1||n>1000)throw new Error("Bad period in '"+tok+"'");
+ if(name==='sma')return rollMean(c,n);if(name==='ema')return ema(c,n);if(name==='rsi')return rsi(c,n);
+ if(name==='bb_upper'){const a=rollMean(c,n),s=rollStd(c,n);return a.map((x,i)=>x+2*s[i])}
+ if(name==='bb_lower'){const a=rollMean(c,n),s=rollStd(c,n);return a.map((x,i)=>x-2*s[i])}
+ if(name==='highest')return rollExt(df.h,n,Math.max);if(name==='lowest')return rollExt(df.l,n,Math.min);   /* uses previous bars only: no look-ahead */
+ if(name==='zscore'){const a=rollMean(c,n),s=rollStd(c,n);return c.map((x,i)=>(x-a[i])/s[i])}
+ throw new Error("Unknown indicator '"+name+"'")}
+function cond(df,c){const L=ind(df,c.left);let R=ind(df,c.right);const n=df.c.length;if(!Array.isArray(L))throw new Error('Left side must be an indicator');
+ if(!Array.isArray(R)){const v=R;R=new Array(n).fill(v)}const o=new Array(n).fill(false);
+ for(let i=0;i<n;i++){let b=false;
+  if(c.op==='>')b=L[i]>R[i];else if(c.op==='<')b=L[i]<R[i];
+  else if(c.op==='crosses_above')b=i>0&&L[i]>R[i]&&L[i-1]<=R[i-1];else if(c.op==='crosses_below')b=i>0&&L[i]<R[i]&&L[i-1]>=R[i-1];else throw new Error('Bad operator');o[i]=b}return o}
+const describe=c=>`${c.left} ${{crosses_above:'crosses above',crosses_below:'crosses below','>':'is above','<':'is below'}[c.op]} ${c.right}`;
+/* ============================ engine ============================ */
+const r2=x=>Math.round(x*100)/100,r3=x=>Math.round(x*1000)/1000,r4=x=>Math.round(x*10000)/10000;
+const iso=ms=>new Date(ms).toISOString().slice(0,19).replace('T',' ');
+function runEngine(df,spec,capital,fee,slip){const n=df.c.length,{o,h,l,c}=df;const ent=new Array(n).fill(true);
+ for(const x of spec.entry){const b=cond(df,x);for(let i=0;i<n;i++)ent[i]=ent[i]&&b[i]}
+ const ex=new Array(n).fill(false);for(const x of spec.exit||[]){const b=cond(df,x);for(let i=0;i<n;i++)ex[i]=ex[i]||b[i]}
+ const side=spec.side==='short'?-1:1,sl=spec.stop_pct,tp=spec.take_pct,mb=spec.max_bars,f=fee/100,s=slip/100;
+ let eq=capital,fees=0,pos=0,qty=0,epx=0,efee=0,stop=null,tgt=null,ei=0;const curve=new Array(n).fill(capital),trades=[];
+ const book=(i,xp,why)=>{xp=xp*(1-pos*s);const pnl=pos*(xp-epx)*qty,fx=xp*qty*f;eq+=pnl-fx;fees+=fx;const net=pnl-fx-efee;
+  trades.push({entry_time:iso(df.t[ei]),exit_time:iso(df.t[i]),side:pos===1?'LONG':'SHORT',entry:r4(epx),exit:r4(xp),pnl:r2(net),ret_pct:r3(net/(epx*qty)*100),bars:i-ei,reason:why});pos=0};
+ for(let i=1;i<n;i++){let fresh=false;
+  if(pos===0&&ent[i-1]){epx=o[i]*(1+side*s);qty=eq/epx;efee=eq*f;eq-=efee;fees+=efee;pos=side;ei=i;fresh=true;
+   stop=sl?epx*(1-side*sl/100):null;tgt=tp?epx*(1+side*tp/100):null}
+  if(pos){let xp=null,why=null;
+   if(!fresh&&ex[i-1]){xp=o[i];why='signal'}
+   else if(stop!==null&&((pos===1&&l[i]<=stop)||(pos===-1&&h[i]>=stop))){xp=pos===1?Math.min(o[i],stop):Math.max(o[i],stop);why='stop'}   /* stop checked first = conservative */
+   else if(tgt!==null&&((pos===1&&h[i]>=tgt)||(pos===-1&&l[i]<=tgt))){xp=tgt;why='target'}
+   else if(mb&&i-ei>=mb){xp=c[i];why='time'}
+   if(xp!==null)book(i,xp,why)}
+  curve[i]=eq+(pos?pos*(c[i]-epx)*qty:0)}
+ if(pos){book(n-1,c[n-1],'end');curve[n-1]=eq}
+ return {curve,trades,fees}}
+function summarize(curve,trades,capital){const pn=trades.map(t=>t.pnl),w=pn.filter(x=>x>0),ls=pn.filter(x=>x<0),sum=a=>a.reduce((p,q)=>p+q,0);
+ let st=0,best=0;for(const v of pn){st=v<0?st+1:0;best=Math.max(best,st)}
+ return {trades:pn.length,net:curve[curve.length-1]-capital,ret:(curve[curve.length-1]/capital-1)*100,win:pn.length?w.length/pn.length*100:0,
+  pf:ls.length&&sum(ls)<0?sum(w)/Math.abs(sum(ls)):null,exp:pn.length?sum(pn)/pn.length:0,avg_win:w.length?sum(w)/w.length:0,avg_loss:ls.length?sum(ls)/ls.length:0,max_loss_streak:best}}
+function fullMetrics(df,curve,trades,capital,fees,ppy){const m=summarize(curve,trades,capital);let pk=-Infinity,dd=0,ddp=0;
+ curve.forEach(v=>{pk=Math.max(pk,v);dd=Math.min(dd,v-pk);ddp=Math.min(ddp,(v-pk)/pk*100)});m.max_dd=dd;m.max_dd_pct=ddp;
+ const day=new Map();df.t.forEach((t,i)=>day.set(new Date(t).toISOString().slice(0,10),curve[i]));const dv=[...day.values()],rt=[];for(let i=1;i<dv.length;i++)rt.push(dv[i]/dv[i-1]-1);
+ m.sharpe=null;if(rt.length>5){const mu=rt.reduce((p,q)=>p+q,0)/rt.length,sd=Math.sqrt(rt.reduce((p,q)=>p+(q-mu)**2,0)/(rt.length-1));if(sd>0)m.sharpe=mu/sd*Math.sqrt(ppy)}
+ const n=df.c.length;m.buy_hold=(df.c[n-1]/df.o[0]-1)*100;m.fees=fees;const gross=trades.filter(t=>t.pnl>0).reduce((p,t)=>p+t.pnl,0);
+ m.fee_share=gross>0?fees/gross*100:null;const top=trades.map(t=>t.pnl).sort((a,b)=>b-a)[0];m.top_trade_share=top>0&&m.net>0?top/m.net*100:null;return m}
+function realityCheck(m,iso_,oos,notes,src){const r=[],add=(l,t)=>r.push({level:l,text:t});
+ if(m.trades<30)add('bad',`Only ${m.trades} trades. Fewer than ~30 trades is too small to trust any win rate or profit factor.`);
+ if(m.trades>=5&&m.win>80)add('warn',`Win rate ${m.win.toFixed(0)}% looks too good. Check for look-ahead, tiny samples or missing costs.`);
+ if(m.pf&&m.pf>3)add('warn',`Profit factor ${m.pf.toFixed(1)} is unusually high; real strategies rarely sustain this.`);
+ if(m.ret<m.buy_hold)add('info',`Strategy return (${m.ret.toFixed(1)}%) is below simple buy & hold (${m.buy_hold.toFixed(1)}%).`);
+ if(m.fee_share&&m.fee_share>30)add('warn',`Costs eat ${m.fee_share.toFixed(0)}% of gross profit. Small edges vanish after fees/slippage.`);
+ if(m.top_trade_share&&m.top_trade_share>40)add('warn',`One trade makes ${m.top_trade_share.toFixed(0)}% of net profit: the result depends on luck, not repeatability.`);
+ if(m.max_dd_pct<-30)add('warn',`Max drawdown ${m.max_dd_pct.toFixed(0)}%: most people abandon a strategy long before this.`);
+ if(m.max_loss_streak>=6)add('info',`Longest losing streak: ${m.max_loss_streak} trades in a row.`);
+ if(iso_&&oos&&iso_.trades>=5){if(oos.trades<5)add('info','Out-of-sample period has too few trades to judge.');
+  else if((iso_.ret>0&&oos.ret<=0)||(iso_.pf&&oos.pf&&oos.pf<iso_.pf*0.5))add('bad','Out-of-sample (last 30%) is much worse than in-sample (first 70%): a classic overfitting sign.')}
+ notes.forEach(n=>add('info',n));
+ add('info','Entries fill at the NEXT bar open after a signal (no look-ahead). If stop and target are both touched in one bar, the stop is assumed hit first.');
+ add('info','Data comes from a third party ('+src+') and may contain gaps, errors or delays. Past performance does not predict future results. Educational use only.');return r}
+function core(df,spec,capital,fee,slip,ppy,notes,src){const e=runEngine(df,spec,capital,fee,slip),m=fullMetrics(df,e.curve,e.trades,capital,e.fees,ppy);let isr=null,osr=null;const n=df.c.length;
+ if(n>200){const k=Math.floor(n*0.7),sub=(a,b)=>({t:df.t.slice(a,b),o:df.o.slice(a,b),h:df.h.slice(a,b),l:df.l.slice(a,b),c:df.c.slice(a,b),v:df.v.slice(a,b)});
+  const a=runEngine(sub(0,k),spec,capital,fee,slip),b=runEngine(sub(k,n),spec,capital,fee,slip);isr=summarize(a.curve,a.trades,capital);osr=summarize(b.curve,b.trades,capital)}
+ const step=Math.max(1,(n-1)/499),idx=[];for(let x=0;x<n;x+=step)idx.push(Math.round(x));if(idx[idx.length-1]!==n-1)idx.push(n-1);
+ return {metrics:m,insample:isr,oos:osr,bars:n,start:iso(df.t[0]),end:iso(df.t[n-1]),spec,trades:e.trades.slice(-100),notes,src,
+  curve:{t:idx.map(i=>iso(df.t[i])),strat:idx.map(i=>r2(e.curve[i])),bench:idx.map(i=>r2(capital*df.c[i]/df.o[0]))},checks:realityCheck(m,isr,osr,notes,src)}}
+/* ============================ live data ============================ */
+function finish(rows,notes){rows=rows.filter(r=>r.every(x=>isFinite(x))).sort((a,b)=>a[0]-b[0]);const out=[];rows.forEach(r=>{if(!out.length||out[out.length-1][0]!==r[0])out.push(r)});
+ if(out.length<60)throw new Error('Only '+out.length+' valid bars returned - need at least 60.');return {df:{t:out.map(r=>r[0]),o:out.map(r=>r[1]),h:out.map(r=>r[2]),l:out.map(r=>r[3]),c:out.map(r=>r[4]),v:out.map(r=>r[5])},notes}}
+async function getJSON(u,t=25000){const ac=new AbortController(),id=setTimeout(()=>ac.abort(),t);try{const r=await fetch(u,{signal:ac.signal});if(!r.ok)throw new Error('HTTP '+r.status);return await r.json()}finally{clearTimeout(id)}}
+async function fetchBinance(sym,iv,days){const end=Date.now();let err='';
+ for(const host of ['https://data-api.binance.vision','https://api.binance.com']){try{let rows=[],cur=end-days*864e5;
+  while(cur<end&&rows.length<60000){const k=await getJSON(`${host}/api/v3/klines?symbol=${sym}&interval=${iv}&startTime=${cur}&limit=1000`);if(!k.length)break;rows=rows.concat(k);cur=k[k.length-1][0]+1}
+  if(rows.length)return finish(rows.map(k=>[k[0],+k[1],+k[2],+k[3],+k[4],+k[5]]),[])}catch(e){err=e.message}}
+ throw new Error('Binance fetch failed ('+err+'). Binance may be blocked on your network: try Bybit or a CSV file.')}
+async function fetchBybit(sym,iv,days){const map={'5m':'5','15m':'15','1h':'60','1d':'D'},start=Date.now()-days*864e5;let end=Date.now(),rows=[];
+ while(end>start&&rows.length<60000){const j=await getJSON(`https://api.bybit.com/v5/market/kline?category=linear&symbol=${sym}&interval=${map[iv]}&end=${end}&limit=1000`);
+  const L=(j.result&&j.result.list)||[];if(!L.length)break;rows=rows.concat(L.map(k=>[+k[0],+k[1],+k[2],+k[3],+k[4],+k[5]]));end=Math.min(...L.map(k=>+k[0]))-1}
+ return finish(rows.filter(r=>r[0]>=start),[])}
+async function fetchYahoo(sym,iv,days){const notes=[],lim={'5m':59,'15m':59,'1h':729,'1d':3650}[iv];if(days>lim){notes.push(`Yahoo only provides ${lim} days of ${iv} data; period shortened.`);days=lim}
+ const rng=days<=5?'5d':days<=30?'1mo':days<=60?'60d':days<=180?'6mo':days<=365?'1y':days<=730?'2y':days<=1825?'5y':'10y';
+ const url=`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?range=${rng}&interval=${iv}`;let err='';
+ for(const px of [u=>'https://corsproxy.io/?'+encodeURIComponent(u),u=>'https://api.allorigins.win/raw?url='+encodeURIComponent(u)]){
+  try{const j=await getJSON(px(url)),r=j.chart.result[0],q=r.indicators.quote[0],rows=[];
+   r.timestamp.forEach((t,i)=>rows.push([t*1000+19800000,q.open[i],q.high[i],q.low[i],q.close[i],q.volume[i]||0]));   /* shifted to IST */
+   return finish(rows,notes)}catch(e){err=e.message}}
+ throw new Error('Yahoo Finance via proxy failed ('+err+'). Public proxies are unreliable: download a CSV and use "My CSV file".')}
+function parseTime(s){s=String(s).trim();if(/^\d{9,13}$/.test(s)){const n=+s;return n>1e11?n:n*1000}
+ let m=s.match(/^(\d{2})[-\/](\d{2})[-\/](\d{4})(?:[ T](\d{2}):(\d{2})(?::(\d{2}))?)?/);if(m)return Date.UTC(+m[3],+m[2]-1,+m[1],+(m[4]||0),+(m[5]||0),+(m[6]||0));
+ m=s.match(/^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}):(\d{2})(?::(\d{2}))?)?/);if(m)return Date.UTC(+m[1],+m[2]-1,+m[3],+(m[4]||0),+(m[5]||0),+(m[6]||0));return NaN}
+function parseCSV(text){const lines=text.replace(/\r/g,'').split('\n').filter(x=>x.trim());if(lines.length<2)throw new Error('CSV is empty');
+ const d=lines[0].includes(';')?';':lines[0].includes('\t')?'\t':',',hd=lines[0].split(d).map(x=>x.trim().toLowerCase().replace(/"/g,''));
+ const ix=k=>hd.indexOf(k),ti=['time','date','datetime','timestamp'].map(ix).find(i=>i>=0),O=ix('open'),H=ix('high'),L=ix('low'),C=ix('close'),V=ix('volume');
+ if(ti===undefined||O<0||H<0||L<0||C<0)throw new Error('CSV needs columns: time/date, open, high, low, close (volume optional)');
+ const rows=lines.slice(1).map(ln=>{const p=ln.split(d).map(x=>x.replace(/"/g,'').trim());return [parseTime(p[ti]),+p[O],+p[H],+p[L],+p[C],V>=0?(+p[V]||0):0]});return finish(rows,[])}
+let SRV=null;
+async function api(path,body){const h={'Content-Type':'application/json'},c=sessionStorage.getItem('btl_code');if(c)h['X-Access-Code']=c;
+ const r=await fetch(path,{method:body?'POST':'GET',headers:h,body:body?JSON.stringify(body):undefined});let j={};try{j=await r.json()}catch(e){}
+ if(r.status===401&&j.code_required){const v=window.prompt('This site needs an access code (ask the owner):');if(v){sessionStorage.setItem('btl_code',v.trim());return api(path,body)}}
+ if(!r.ok)throw new Error(j.error||('HTTP '+r.status));return j}
+async function fetchServer(src,sym,iv,days){const j=await api('/api/candles',{market:$('market').value,symbol:sym,interval:iv,days,source:src});const o=finish(j.rows,j.notes||[]);o.used='srv:'+j.source;o.fetched=j.fetched_utc;return o}
+async function loadData(src,sym,iv,days){if(src.startsWith('srv:'))return fetchServer(src.slice(4),sym,iv,days);if(src==='binance')return fetchBinance(sym,iv,days);if(src==='bybit')return fetchBybit(sym,iv,days);if(src==='yahoo')return fetchYahoo(sym,iv,days);
+ if(src==='csv'){if(!csvText)throw new Error('Choose a CSV file first.');return parseCSV(csvText)}throw new Error('Unknown source')}
+/* ============================ prompt parser ============================ */
+const VOCAB=['ema','sma','rsi','bollinger','breakout','crossover','stoploss','target','bearish','bullish','nifty','banknifty','sensex','bitcoin','ethereum','solana','below','above','under','over','daily','hourly','minute','strategy','backtest','reversion','momentum','golden','death','zscore','reliance','infosys','average','moving','profit'];
+const KNOWN=new Set('when enter exit price close high low stop loss take buy sell long short with than days the and for candle bars last hour week month year chart time cross crosses crossed then rule using trade trades market value above stock index live data'.split(' '));
+function lev(a,b){let p=Array.from({length:b.length+1},(_,j)=>j);for(let i=1;i<=a.length;i++){const q=[i];for(let j=1;j<=b.length;j++)q[j]=Math.min(p[j]+1,q[j-1]+1,p[j-1]+(a[i-1]===b[j-1]?0:1));p=q}return p[b.length]}
+function closest(w){let best=null,bs=0.8;for(const v of VOCAB){const r=1-lev(w,v)/Math.max(w.length,v.length);if(r>=bs&&(best===null||r>bs)){best=v;bs=r}}return best}
+const C_=(l,o,r)=>({left:l,op:o,right:String(r)});
+function parsePrompt(text){let t=text.toLowerCase().trim();const corr=[],asm=[],warn=[];
+ t=t.replace(/[a-z]{4,}/g,w=>{if(VOCAB.includes(w)||KNOWN.has(w))return w;const c=closest(w);if(c){corr.push(`'${w}' -> '${c}'`);return c}return w});
+ let hits=[];for(const [tb,mk] of [[CRYPTO,'crypto'],[INDIA,'india']])for(const sym in tb)for(const a of tb[sym])if(new RegExp('\\b'+a.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\b').test(t))hits.push([a.length,mk,sym]);
+ let market,symbol;if(hits.length){hits.sort((x,y)=>y[0]-x[0]);market=hits[0][1];symbol=hits[0][2]}else{market='crypto';symbol='BTCUSDT';asm.push('No instrument found: assumed BTC/USDT.')}
+ if(/option|spread|condor|straddle|strangle/.test(t))warn.push('Options strategies need option-chain/Greeks data. This version backtests the UNDERLYING only, so your view is mapped to a directional trade on it as a proxy. Real option P&L (theta, IV, bid-ask) will differ a lot.');
+ const explicit=/bearish|\bshort\b|\bsell\b|selling|downtrend|\blong\b|\bbuy\b|bullish|uptrend/.test(t);
+ let side=/bearish|\bshort\b|\bsell\b|selling|downtrend/.test(t)&&!/\bbuy\b|bullish/.test(t)?'short':'long';const entry=[],exit_=[];
+ let pair=null,m=t.match(/(ema|sma)\s*(\d+)\s*(?:\/|and|&|-|x)\s*(\d+)/);
+ if(m)pair=[m[1],+m[2],+m[3]];else{m=t.match(/(\d+)\s*(?:\/|and|&|-|x)\s*(\d+)\s*(ema|sma)/);if(m)pair=[m[3],+m[1],+m[2]];
+  else{const mm=[...t.matchAll(/(\d+)[ -]?(?:day |period |bar )?(ema|sma)/g)];if(mm.length>=2&&mm[0][2]===mm[1][2]&&mm[0][1]!==mm[1][1]){pair=[mm[0][2],+mm[0][1],+mm[1][1]];if(/below|under/.test(t)&&!/above|over/.test(t))side='short'}}}
+ if(/golden cross/.test(t)){pair=['sma',50,200];side='long'}if(/death cross/.test(t)){pair=['sma',50,200];side='short'}
+ if(pair){const [k,a,b]=pair,f=`${k}(${Math.min(a,b)})`,s_=`${k}(${Math.max(a,b)})`,[up,dn]=side==='long'?['crosses_above','crosses_below']:['crosses_below','crosses_above'];entry.push(C_(f,up,s_));exit_.push(C_(f,dn,s_))}
+ else{m=t.match(/(\d+)[ -]?(?:day |period |bar )?(ema|sma)/)||t.match(/(ema|sma)\s*(\d+)/);
+  if(m){const g=m.slice(1);let k,n_;if(g[1]==='ema'||g[1]==='sma'){k=g[1];n_=g[0]}else{k=g[0];n_=g[1]}const ma=`${k}(${n_})`;
+   let word=/above|over|breaks? up/.test(t)?'above':/below|under|breaks? down/.test(t)?'below':null;
+   if(word===null){word=side==='long'?'above':'below';asm.push(`Direction vs ${ma} not stated: assumed price crosses ${word} it.`)}
+   if(word==='above'){entry.push(C_('close','crosses_above',ma));exit_.push(C_('close','crosses_below',ma));side=explicit?side:'long'}
+   else{entry.push(C_('close','crosses_below',ma));exit_.push(C_('close','crosses_above',ma));side=(!explicit||side==='short')?'short':side}}}
+ m=t.match(/rsi(?:\s*\(?(\d+)\)?)?\s*(?:is\s*)?(below|under|<|above|over|>)\s*(\d+)/);
+ if(m){const n_=m[1]||14,low=['below','under','<'].includes(m[2]),lvl=m[3];if(!explicit){side=low?'long':'short';asm.push(`RSI mean-reversion assumed: ${low?'buy':'sell short'} when RSI ${low?'<':'>'} ${lvl}.`)}
+  entry.push(C_(`rsi(${n_})`,low?'<':'>',lvl));exit_.push(C_(`rsi(${n_})`,low?'>':'<',50));asm.push('RSI exit rule not given: exit when RSI crosses 50.')}
+ if(/bollinger|\bbb\b/.test(t)){const up_=/upper/.test(t);if(!explicit)side=up_?'short':'long';
+  if(up_){entry.push(C_('close','>','bb_upper(20)'));exit_.push(C_('close','<','sma(20)'))}else{entry.push(C_('close','<','bb_lower(20)'));exit_.push(C_('close','>','sma(20)'))}
+  asm.push('Bollinger (20, 2 std) mean-reversion; exit at the 20-bar average.')}
+ if(/breakout|\d+[- ]?(?:day|bar|candle|period)?\s*high/.test(t)){m=t.match(/(\d+)[- ]?(?:day|bar|candle|period)?\s*(?:high|low|breakout)/);const n_=m?+m[1]:20,h_=Math.max(Math.floor(n_/2),2);
+  if(side==='long'){entry.push(C_('close','>',`highest(${n_})`));exit_.push(C_('close','<',`lowest(${h_})`))}else{entry.push(C_('close','<',`lowest(${n_})`));exit_.push(C_('close','>',`highest(${h_})`))}
+  asm.push(`Donchian breakout over ${n_} bars; exit on ${h_}-bar opposite extreme.`)}
+ m=t.match(/z-?score\s*(?:is\s*)?(below|under|<|above|over|>)\s*(-?\d+(?:\.\d+)?)/);
+ if(m){const low=['below','under','<'].includes(m[1]),x=Math.abs(parseFloat(m[2]));if(!explicit)side=low?'long':'short';
+  entry.push(C_('zscore(20)',low?'<':'>',low?-x:x));exit_.push(C_('zscore(20)',low?'>':'<',0));asm.push('Z-score uses a 20-bar window; exit when it returns to 0.')}
+ let sl=null,tp=null;m=t.match(/(?:stop ?loss|\bsl\b)\s*(?:of|at)?\s*(\d+(?:\.\d+)?)\s*%/);if(m)sl=parseFloat(m[1]);m=t.match(/(?:target|\btp\b|take profit)\s*(?:of|at)?\s*(\d+(?:\.\d+)?)\s*%/);if(m)tp=parseFloat(m[1]);
+ let spec=null;if(!entry.length)warn.push("I could not find an entry rule. Try: 'Buy BTC when 20 EMA crosses above 50 EMA on 1h, stop loss 2%, target 4%' or 'ETH RSI below 30 on 1h'.");
+ else{if(!exit_.length&&!sl){sl=2;tp=4;asm.push('No exit given: added 2% stop and 4% target as a safe default.')}spec={name:'From prompt',side,entry,exit:exit_,stop_pct:sl,take_pct:tp}}
+ let iv=null;m=t.match(/(\d+)\s*(?:min|minute|m)\b/);
+ if(m){const v=+m[1],near=[5,15,60].reduce((a,b)=>Math.abs(b-v)<Math.abs(a-v)?b:a);iv={5:'5m',15:'15m',60:'1h'}[near];if(near!==v)corr.push(`${v}m not supported -> ${iv}`)}
+ else if(/\b1\s*h\b|hourly|\bhour\b/.test(t))iv='1h';else if(/\bdaily\b|\b1d\b/.test(t))iv='1d';
+ if(iv===null){iv='1d';asm.push('Timeframe not stated: assumed daily bars.')}
+ let days=DEFAULT_DAYS[iv];m=t.match(/(?:last|past)\s*(\d+)\s*(day|week|month|year)/);if(m)days=+m[1]*{day:1,week:7,month:30,year:365}[m[2]];
+ if(entry.length>2)warn.push('More than 2 entry conditions: the more rules you add, the easier it is to overfit.');
+ let desc='';if(spec)desc=`${spec.side.toUpperCase()} ${symbol} on ${iv} bars for the last ${days} days. Enter when ${entry.map(describe).join(' AND ')}${exit_.length?'; exit when '+exit_.map(describe).join(' OR '):''}${sl?`; stop loss ${sl}%`:''}${tp?`; target ${tp}%`:''}. Fees 0.05% + slippage 0.05% per side. Entries fill at next bar open.`;
+ return {clean_prompt:desc,corrections:corr,assumptions:asm,warnings:warn,spec,market,symbol,interval:iv,days}}
+/* ============================ content ============================ */
+const S_=(name,side,entry,exit_,sl,tp)=>({name,side,entry,exit:exit_,stop_pct:sl||null,take_pct:tp||null});
+const LIBRARY=[
+{name:'EMA 20/50 Trend Crossover',tags:['trend'],desc:'Long when fast EMA crosses above slow EMA; exit on the reverse cross.',interval:'1d',spec:S_('EMA 20/50','long',[C_('ema(20)','crosses_above','ema(50)')],[C_('ema(20)','crosses_below','ema(50)')],3)},
+{name:'Golden Cross 50/200',tags:['trend','slow'],desc:'Classic 50/200 SMA cross. Very few trades, so statistically weak.',interval:'1d',spec:S_('Golden Cross','long',[C_('sma(50)','crosses_above','sma(200)')],[C_('sma(50)','crosses_below','sma(200)')])},
+{name:'RSI(14) Oversold Bounce',tags:['mean-reversion'],desc:'Buy when RSI < 30, exit when RSI > 50, 3% stop.',interval:'1h',spec:S_('RSI Bounce','long',[C_('rsi(14)','<',30)],[C_('rsi(14)','>',50)],3)},
+{name:'Bollinger Mean Reversion',tags:['mean-reversion'],desc:'Buy a close below the lower band; exit at the 20-bar average.',interval:'1h',spec:S_('Bollinger Reversion','long',[C_('close','<','bb_lower(20)')],[C_('close','>','sma(20)')],3)},
+{name:'20-Bar Breakout (Donchian)',tags:['breakout','trend'],desc:'Buy a close above the 20-bar high; exit below the 10-bar low.',interval:'1d',spec:S_('Donchian 20','long',[C_('close','>','highest(20)')],[C_('close','<','lowest(10)')])},
+{name:'Z-score Mean Reversion',tags:['mean-reversion'],desc:'Buy when price is 2 std below its 20-bar mean; exit at the mean.',interval:'1h',spec:S_('Z-score','long',[C_('zscore(20)','<',-2)],[C_('zscore(20)','>',0)],4)},
+{name:'Bearish: Close below 20 EMA (short)',tags:['trend','short'],desc:'Short when price crosses below its 20 EMA; cover on cross back above.',interval:'1d',spec:S_('Bearish 20 EMA','short',[C_('close','crosses_below','ema(20)')],[C_('close','crosses_above','ema(20)')],2)}];
+const EXAMPLES=['Buy BTC when 20 EMA crosses above 50 EMA on 1h, stop loss 2%, target 4%','ETH RSI below 30 on 1h, exit at RSI 50','Short BANKNIFTY when price closes below 20 EMA daily, sl 1.5%','SOL 20-day breakout with 3% stop loss','bactest sol bolinger lower band 1h'];
+const DISCLAIMER=[
+['Educational use only','BacktestLab is a free learning tool created by CA Sunil Kumar Paswan in his personal capacity. It is not a SEBI-registered Investment Adviser or Research Analyst and does not give investment advice, tips, recommendations or solicitations to buy, sell or hold any security, derivative or crypto asset. The strategies shown are generic textbook rules, not recommendations.'],
+['Backtests are hypothetical','Results are computed on historical data with simplifying assumptions. They do not predict future results and may differ greatly from real trading, which involves slippage, liquidity gaps, outages, charges, taxes and human emotion. Strategies that look good on past data often fail on new data.'],
+['Data sources, no warranty','Market data is fetched live from third parties (Dhan, Binance, Bybit, Yahoo Finance (directly, via public proxies, or via the site server), or your own CSV file) and may be delayed, incomplete, adjusted or wrong. The tool and its results are provided "as is" without warranty of any kind. The creator accepts no liability for any loss or damage arising from use of this site.'],
+['SEBI','Trading in equity, index and F&O is risky; SEBI studies have found that a large majority of individual F&O traders incur net losses. Only SEBI-registered intermediaries may offer investment advice or research recommendations. Check the registration of anyone you rely on at sebi.gov.in.'],
+['RBI / FEMA','Residents\' overseas transactions are governed by the Foreign Exchange Management Act, 1999 and the Liberalised Remittance Scheme. Margin or forex trading on platforms not authorised by the RBI is not permitted; see the RBI Alert List at rbi.org.in. This site does not facilitate any such transaction.'],
+['Crypto / virtual digital assets','Virtual digital assets are not legal tender in India, are not regulated like securities, and can lose all value. Exchanges can be hacked, delisted or blocked. Gains are taxed under Indian law (currently a flat 30% plus 1% TDS: verify current rules with a tax professional).'],
+['No affiliation','This site is an independent personal project. It is not affiliated with, sponsored or endorsed by any employer, company, exchange, broker, data provider or regulator, and the views and examples here are the creator\'s own.'],
+['Your privacy and security','The backtest itself runs in your browser and CSV files never leave your device. When this site is hosted with its secure server, live-data requests go through that server, and if you press the Claude (AI) button the text of your strategy idea is sent to the server and on to Anthropic to be interpreted - so never type personal, client, employer or confidential information into the prompt. The site owner API keys are kept only on the server and are never visible in this page. Never enter your own API keys, passwords or access tokens on any website, including this one.'],
+['Your responsibility','Do not trade real money on the basis of anything shown here. Consult a SEBI-registered adviser and a qualified tax professional before making financial decisions.']];
+const MISTAKES=[['Look-ahead bias','Using a bar\'s close to trade at that same bar. Here, signals fill at the NEXT bar open.'],['Too few trades','Under ~30 trades, win rate and profit factor are mostly noise.'],['Ignoring costs','Fees, STT, slippage and spreads can erase small edges.'],['Over-fitting','Tuning parameters until the past looks perfect. Check the last 30% of data (out-of-sample).'],['Outlier dependence','If one or two trades make most of the profit, there may be no edge.'],['Survivorship / data limits','Only today\'s surviving stocks; short histories; continuous futures roll gaps.'],['Wrong metric','A "win rate" that ignores direction, stops or costs is not a trading result.']];
+const FAILURES=[
+{id:1,title:'93-96% \'win rate\' that was really a volatility counter',market:'India stocks',strategy:'Nifty-100 option-buying edge scanner (5-min data, ADX filter)',source:'OPTION_BUYING_NEW_SCANNER',headline:'Scanner showed 92-96% win rate on Adani stocks, Eternal, Lodha',error_types:['Wrong metric','Too-good-to-be-true'],what_went_wrong:'The scanner counted a \'win\' as a 0.5% move within 12 candles. Direction, stop loss, option premium, theta and costs were not part of the definition, so the number measures how much a stock moves, not whether a trade makes money.',lesson:'A win rate is only meaningful if it is measured on real trades with entry, stop, exit and costs. If a result looks above 80%, first suspect the definition.',status:'Confirmed from printed output; definition read from the printed text'},
+{id:2,title:'Same stocks, realistic trades: 35-38% win rate and negative expectancy',market:'India stocks',strategy:'Volume-shock option-buying audit (1-min data, 15-min holding window)',source:'OPTION_CHIAN_DOWNLAOD',headline:'JIOFIN 35.0% win, expectancy -0.296%; COALINDIA 36.6% win, expectancy -0.368%',error_types:['Contradicts earlier result','Negative expectancy'],what_went_wrong:'Once wins and losses were measured on actual entries and exits, the same kind of high-volatility stocks showed average losses (-1.9% to -2.3%) close to average wins (+2.2% to +3.1%) at a win rate well under 40%. That is a negative-expectancy system.',lesson:'Put both numbers side by side: the flattering scan (entry 1) and the realistic audit (this entry). The realistic one is the one you can trade.',status:'Confirmed from printed output'},
+{id:3,title:'1,764 trades, 32.6% win rate, but +117% average P&L per trade?',market:'India stock options',strategy:'Fast/slow MA crossover on option candles with % stop and target',source:'OPTION_CHIAN_DOWNLAOD',headline:'Average PnL per trade 117.11% with a win rate of only 32.6%',error_types:['Implausible metric','Possible unit/liquidity bug'],what_went_wrong:'An average gain above 100% per trade with a 1-in-3 win rate is not believable. Likely causes to check: very cheap, illiquid option candles producing huge percentage moves; entry at the option\'s close on the signal candle (look-ahead on a thin market); no costs or bid-ask spread; averaging percentages rather than rupees.',lesson:'When one number looks impossible, stop and audit the data and units before looking at anything else. Report rupee P&L after costs next to percentage figures.',status:'Needs checking: code was read but not re-run, so the cause is a hypothesis'},
+{id:4,title:'One trade was 54% of the total profit',market:'India stock options (delta proxy)',strategy:'1-lakh capital option backtest using a delta proxy instead of real option prices',source:'OPTION_BUYING_NEW_SCANNER',headline:'Total P&L Rs 30,311; best single ADANIENSOL trade Rs 16,257; with the VEDL trade, two trades = 88%',error_types:['Outlier dependence','Modelled prices'],what_went_wrong:'Two winning trades produce nearly 88% of the profit; without them only about Rs 3,755 of the Rs 30,311 remains. Option P&L was also estimated from spot moves with a delta proxy, so theta, IV changes and bid-ask spread were not in the numbers.',lesson:'Always check the profit with the top 1-2 trades removed. If the edge disappears, there was no edge, only luck.',status:'Confirmed from printed output (16,257.21 / 30,311 = 53.6%; 26,556.32 / 30,311 = 87.6%)'},
+{id:5,title:'One month supplied about half of a \'4.7x in a year\'',market:'Gold (XAUUSD)',strategy:'Apex Compounder V10, 5% risk per trade, H1 bars',source:'GOLD_XAUSD',headline:'372.93% ROI, 51 trades; September 2025 alone +119.39% (6 trades)',error_types:['Outlier month','Small sample','Risk-size inflation'],what_went_wrong:'Equity went from 34,050 to 74,704 in one month (2.19x), which is about half of the total log-growth. The same 51 trades at lower risk (V8) returned 19.05%. The 372% is mostly position sizing applied to a handful of good trades, not a stronger edge. The notebook itself notes to expect 30%+ drawdown at this risk level.',lesson:'Compounding at high risk turns a small sample into a spectacular curve. Judge the signal at fixed small risk, and show the drawdown you would have lived through.',status:'Confirmed from printed output (74,703.90 / 34,049.98 = 2.19x)'},
+{id:6,title:'\'559% return on deposit\' is the same 51 trades, shown twice',market:'Gold (XAUUSD)',strategy:'Bonus-account compounder ($500 cash + $250 credit)',source:'GOLD_XAUSD',headline:'559.43% return on deposit; max drawdown 23.88%, identical to the Apex run',error_types:['Duplicate evidence','Broker-bonus assumptions'],what_went_wrong:'The identical drawdown and trade count show this is the Apex trade list re-scaled to a $750 start, not independent evidence. Bonus-credit rules, lot-size rounding, spreads and slippage on a micro account are not modelled.',lesson:'Re-scaling one backtest does not create a second backtest. Count each trade list once.',status:'Confirmed from printed output'},
+{id:7,title:'100% win rate on 7 trades, labelled \'Validated & Optimized\'',market:'NIFTY / BANKNIFTY / SENSEX',strategy:'Signal audit, High vs Medium signals, 5-min tracking (10-19 Aug 2026)',source:'Quantitative Signal Audit report (PDF)',headline:'BANKNIFTY High signals 7/7 wins; 41 trades in the whole window; exits re-tuned on the same data',error_types:['Tiny sample','In-sample optimisation','Short window'],what_went_wrong:'Seven wins out of seven only proves the true win rate is probably above about 65% (95% Wilson lower bound). Each cell has 6-9 trades over about eight trading days. The recommended exits (50 / 60-65 / 65-70 minutes) were read off the same data they were tested on.',lesson:'Report a confidence range, not just a percentage. Fit exit rules on one period and test them on another that was never touched.',status:'Confirmed from the PDF report'},
+{id:8,title:'A hard-coded \'58.9% win rate, profit factor 1.64\' in the alert message',market:'Gold and Bitcoin futures',strategy:'Multi-timeframe 50/200 EMA pullback signal bot (5-min, GC=F / BTC=F)',source:'future_gold_and_btc',headline:'Startup message claims a backtested win rate and profit factor; the script only downloads 5 days of data',error_types:['Unreproducible claim','Data limits','Compliance'],what_went_wrong:'The script itself can only see 5 days of 5-minute history, so the quoted statistics cannot come from it. A 240-period EMA on 5 days, continuous-futures roll gaps, and no stated costs also make the number fragile. Putting performance claims in messages that others may read can create compliance trouble.',lesson:'Every performance figure should link to a saved run (data range, parameters, costs). Never type a number into an alert by hand.',status:'Found in code review; the figures may come from a different test'},
+{id:9,title:'Stopped out in 1 minute: backtest vs live behaviour',market:'India stock (VEDL)',strategy:'Sniper V5 forward test: spot-based CE/PE signal, hard stop at signal-candle low',source:'FINAL_STOCK_OPTION',headline:'VEDL CE entered at 324.00, hard stop at 322.75 hit after 1 minute; opposite PE signal 5 minutes later; both daily signals used by 15:07',error_types:['Stop inside noise','Late-session entry','Spot used as option proxy'],what_went_wrong:'The stop (about 0.4% away) sits inside normal 1-minute noise, and the signal came at 15:01, close to the end of the session. Whipsaw consumed both daily signals within about six minutes. Alerts are on the stock price, while the real option premium (spread, theta) moves differently.',lesson:'Test stop distance against average candle range (ATR). Forward-test results are the honest check on a backtest; keep a log of every one.',status:'Confirmed from forward-test output'},
+{id:10,title:'Pairs bot: the profit-target exit can almost never fire',market:'Crypto (SOL/LINK on Delta Exchange)',strategy:'Titan V11 log-price regression pairs trade, window 168',source:'DELTA_EXCHNAGE_LIVE',headline:'Z_EXIT = 0.0 with the exit test \'abs(z) <= Z_EXIT\'',error_types:['Logic bug','No backtest evidence'],what_went_wrong:'A float z-score is almost never exactly 0.0, so the take-profit exit does not trigger; the position would leave only through the z-stop (3.2) or the 10% capital stop. Mean-reversion strategies that never take profit end up as a series of stop-outs. The notebook also contains no historical backtest of this exact rule set.',lesson:'Use a crossing test (sign change of z) or a small band such as 0.2, and unit-test exit conditions on synthetic data before going live.',status:'Found in code review; to be confirmed against live logs'},
+{id:11,title:'Pairs bots: signal computed on a candle that has not closed',market:'Crypto (SOL/LINK on Bybit demo and Delta)',strategy:'Titan V1 / V6 / V11 z-score pair arbitrage',source:'Z_SCORE_SOL_LINK, SOL_VS_LINK_Z_SCORE_VPS, DELTA_EXCHNAGE_LIVE',headline:'Hourly bars polled every 5-10 seconds; z-score uses the still-forming latest bar',error_types:['Repainting','Leg risk','Over-fitting of filters'],what_went_wrong:'The latest row of the kline data is the open candle, so the z-score moves tick by tick and can cross the entry level and come back within the hour. That behaviour is not what a closed-bar backtest assumes. In V11 the ADF and Hurst filters are computed on the same 168-point window used to fit the hedge ratio, which makes them look better than they are. Across versions the leverage fell from 10x to 3x, and window, entry and filters were all changed, which suggests parameters were tuned after seeing results.',lesson:'Decide on closed bars only, or backtest tick-level. Keep a record of each version\'s parameters and why they changed; a pile of tuned filters is a warning sign, not proof.',status:'Found in code review'},
+{id:12,title:'\'Asian box\' sessions in broker time versus UTC',market:'Gold (XAUUSD)',strategy:'SMC liquidity-sweep bot on MT5 versus Pine strategy on TradingView',source:'GOLD_SMC_MT5_NEW, GOLD_WORKING_TRADING_VIEW',headline:'MT5 bot defines the Asian range as broker hours 0-8; the Pine strategy uses 13:00-17:00 UTC',error_types:['Time-zone mismatch','Cross-platform inconsistency'],what_went_wrong:'MT5 server time is usually offset from UTC and often shifts with daylight saving, so the \'Asian\' box and the trading window may not mean the same hours across weeks or between platforms. Results from one tool will not match the other, and the difference is easy to miss.',lesson:'Store all timestamps in UTC and convert only for display. When two platforms disagree, compare a single day trade by trade.',status:'Needs checking: depends on the broker\'s server time zone'}];
+/* ============================ UI ============================ */
+let spec=null,csvText='',lastRes=null,dirty=false;
+const fmt=(v,d=2)=>v==null||isNaN(v)?'-':Number(v).toLocaleString('en-IN',{maximumFractionDigits:d,minimumFractionDigits:d});const cls=v=>v>0?'g':v<0?'r':'';
+function tab(t){document.querySelectorAll('main>section').forEach(s=>s.classList.toggle('hide',s.id!==t));document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===t))}
+$('nav').onclick=e=>{if(e.target.dataset.t)tab(e.target.dataset.t)};
+function srcChange(){const s=$('source').value;$('csvBox').classList.toggle('hide',s!=='csv');$('srcNote').textContent=SRCNOTE[s]||''}
+function fillSymbols(sel){const mk=$('market').value,tb=mk==='crypto'?CRYPTO:INDIA;
+ $('symbol').innerHTML=Object.keys(tb).map(k=>`<option value="${esc(k)}">${esc(mk==='crypto'?k.replace('USDT','/USDT'):tb[k][0].toUpperCase())}</option>`).join('');if(sel)$('symbol').value=sel;
+ $('source').innerHTML=SOURCES[mk].map(x=>`<option value="${x[0]}">${x[1]}</option>`).join('');srcChange()}
+$('market').onchange=()=>fillSymbols();$('source').onchange=srcChange;
+$('csv').onchange=e=>{const f=e.target.files[0];if(f){const r=new FileReader();r.onload=()=>csvText=r.result;r.readAsText(f)}};
+function showParsed(p){const b=$('parsed');b.classList.remove('hide');let h='';
+ if(p.clean_prompt)h+=`<h3>Understood as</h3><div class="note info">${esc(p.clean_prompt)}</div>`;
+ if(p.corrections.length)h+=`<h3>Spelling fixed</h3><div class="note">${p.corrections.map(esc).join(' &middot; ')}</div>`;
+ if(p.assumptions.length)h+=`<h3>Assumptions I made</h3>${p.assumptions.map(a=>`<div class="note warn">${esc(a)}</div>`).join('')}`;
+ if(p.warnings.length)h+=`<h3>Heads up</h3>${p.warnings.map(a=>`<div class="note bad">${esc(a)}</div>`).join('')}`;b.innerHTML=h}
+function doParse(){dirty=false;const p=parsePrompt($('prompt').value);showParsed(p);spec=p.spec;$('market').value=p.market;fillSymbols(p.symbol);$('interval').value=p.interval;$('days').value=p.days;return p}
+$('bParse').onclick=doParse;
+$('bAI').onclick=async()=>{const b=$('bAI');$('err').classList.add('hide');const t=$('prompt').value.trim();if(!t){$('err').textContent='Write a strategy first.';$('err').classList.remove('hide');return}
+ b.disabled=true;b.textContent='Claude is reading it...';
+ try{const p=await api('/api/parse-ai',{prompt:t});p.warnings=(p.warnings||[]).concat(['Interpreted by an AI model and checked by safety rules. Always verify the rules shown above match your intent.']);
+  showParsed(p);spec=p.spec;dirty=false;$('market').value=p.market;fillSymbols(p.symbol);$('interval').value=p.interval;$('days').value=p.days}
+ catch(e){$('err').textContent='AI parser: '+e.message+' (the rule-based button still works)';$('err').classList.remove('hide')}b.disabled=false;b.textContent='Understand with Claude (AI)'};
+$('prompt').oninput=()=>{dirty=true};
+function loadSpec(s,iv){spec=s;dirty=false;$('interval').value=iv;$('days').value=DEFAULT_DAYS[iv];tab('bt');const d=c=>`${esc(c.left)} ${c.op.replace('_',' ')} ${esc(c.right)}`;
+ $('parsed').classList.remove('hide');$('parsed').innerHTML=`<h3>Loaded strategy</h3><div class="note info"><b>${esc(s.name)}</b> (${esc(s.side)}): enter when ${s.entry.map(d).join(' AND ')}${s.exit.length?'; exit when '+s.exit.map(d).join(' OR '):''}${s.stop_pct?`; stop ${s.stop_pct}%`:''}${s.take_pct?`; target ${s.take_pct}%`:''}</div>`}
+$('bRun').onclick=async()=>{const b=$('bRun');$('err').classList.add('hide');b.disabled=true;b.textContent='Fetching live data and running...';
+ try{if(dirty&&$('prompt').value.trim())doParse();if(!spec)throw new Error('No strategy yet. Describe one above or pick one from the Strategy Library.');
+  const src=$('source').value,mk=$('market').value,days=Math.min(Math.max(parseInt($('days').value)||365,5),3650);
+  const {df,notes,used,fetched}=await loadData(src,$('symbol').value,$('interval').value,days);
+  const cap=Math.max(1000,+$('cap').value||100000),fee=Math.min(Math.max(+$('fee').value||0,0),2),slip=Math.min(Math.max(+$('slip').value||0,0),2);
+  const names={binance:'Binance',bybit:'Bybit',yahoo:'Yahoo Finance',csv:'your CSV file','srv:dhan':'Dhan API','srv:yahoo':'Yahoo Finance','srv:binance':'Binance','srv:bybit':'Bybit'};
+  lastRes=core(df,spec,cap,fee,slip,mk==='crypto'?365:252,notes,names[used||src]);if(fetched)lastRes.notes=(lastRes.notes||[]).concat(['Server fetched this data live at '+fetched+' UTC.']);lastRes.mk=mk;render(lastRes)}
+ catch(e){$('err').textContent=e.message;$('err').classList.remove('hide')}b.disabled=false;b.textContent='Run backtest on live data'};
+function render(r){const m=r.metrics,u=r.mk==='india'?'\u20b9':'$',k=(l,v,c='')=>`<div class="kpi"><small>${l}</small><b class="${c}">${v}</b></div>`;
+ let h=`<div class="card"><h2>${esc(r.spec.name)} <span class="m" style="font-weight:400">${esc($('symbol').selectedOptions[0].text)} &middot; ${$('interval').value} &middot; ${r.bars.toLocaleString()} bars &middot; ${esc(r.start.slice(0,10))} to ${esc(r.end.slice(0,16))}</span></h2>
+ <div class="m" style="font-size:12px;margin-bottom:8px">Data: ${esc(r.src)}${r.mk==='india'&&r.src!=='your CSV file'?' (times shown in IST)':' (times in UTC unless your CSV says otherwise)'}. Latest bar: ${esc(r.end)}.</div>
+ <div class="kpis">${k('Net P&L',u+fmt(m.net,0),cls(m.net))}${k('Return',fmt(m.ret)+'%',cls(m.ret))}${k('Buy &amp; hold',fmt(m.buy_hold)+'%',cls(m.buy_hold))}${k('Max drawdown',fmt(m.max_dd_pct)+'%','r')}${k('Trades',m.trades)}${k('Win rate',fmt(m.win)+'%')}${k('Profit factor',m.pf==null?'-':fmt(m.pf))}${k('Expectancy / trade',u+fmt(m.exp,0),cls(m.exp))}${k('Avg win / loss',u+fmt(m.avg_win,0)+' / '+u+fmt(m.avg_loss,0))}${k('Sharpe (approx)',m.sharpe==null?'-':fmt(m.sharpe))}${k('Costs paid',u+fmt(m.fees,0))}${k('Worst losing streak',m.max_loss_streak)}</div></div>
+ <div class="card"><h2>Equity curve</h2><div class="legend"><span><i style="background:#2ecc71"></i>Strategy</span><span><i style="background:#8aa09b"></i>Buy &amp; hold</span></div><canvas id="cv"></canvas></div>`;
+ if(r.insample&&r.oos){const row=(n,x)=>`<tr><td>${n}</td><td>${x.trades}</td><td class="${cls(x.ret)}">${fmt(x.ret)}%</td><td>${fmt(x.win)}%</td><td>${x.pf==null?'-':fmt(x.pf)}</td></tr>`;
+  h+=`<div class="card"><h2>Out-of-sample check</h2><table><tr><th>Period</th><th>Trades</th><th>Return</th><th>Win rate</th><th>Profit factor</th></tr>${row('First 70% (in-sample)',r.insample)}${row('Last 30% (out-of-sample)',r.oos)}</table></div>`}
+ h+=`<div class="card"><h2>Reality check: possible errors in this backtest</h2>${r.checks.map(c=>`<div class="note ${c.level}">${esc(c.text)}</div>`).join('')}</div>`;
+ h+=`<div class="card"><h2>Last ${r.trades.length} trades</h2><div style="max-height:280px;overflow:auto"><table><tr><th>Entry</th><th>Side</th><th>Entry px</th><th>Exit px</th><th>P&L</th><th>Return</th><th>Why</th></tr>${r.trades.slice().reverse().map(t=>`<tr><td>${esc(t.entry_time.slice(0,16))}</td><td>${t.side}</td><td>${fmt(t.entry)}</td><td>${fmt(t.exit)}</td><td class="${cls(t.pnl)}">${fmt(t.pnl)}</td><td class="${cls(t.ret_pct)}">${fmt(t.ret_pct)}%</td><td>${t.reason}</td></tr>`).join('')}</table></div></div>
+ <div class="m" style="font-size:12px">Educational only. Not investment advice. BacktestLab by CA Sunil Kumar Paswan.</div>`;$('res').innerHTML=h;draw(r.curve)}
+function draw(c,hv){const cv=$('cv');if(!cv)return;const d=devicePixelRatio||1,W=cv.clientWidth,H=cv.clientHeight;cv.width=W*d;cv.height=H*d;const g=cv.getContext('2d');g.scale(d,d);
+ const P={l:66,r:10,t:8,b:22},a=c.strat,b=c.bench,all=a.concat(b);let mn=Math.min(...all),mx=Math.max(...all);const sp=(mx-mn)||1;mn-=sp*.05;mx+=sp*.05;
+ const X=i=>P.l+(W-P.l-P.r)*i/(a.length-1),Y=v=>P.t+(H-P.t-P.b)*(1-(v-mn)/(mx-mn));g.font='11px system-ui';g.fillStyle='#8aa09b';g.strokeStyle='#223330';
+ for(let i=0;i<=4;i++){const v=mn+(mx-mn)*i/4,y=Y(v);g.beginPath();g.moveTo(P.l,y);g.lineTo(W-P.r,y);g.stroke();g.fillText(Number(v).toLocaleString('en-IN',{maximumFractionDigits:0}),4,y+4)}
+ [0,.5,1].forEach(f=>{const i=Math.round((a.length-1)*f);g.fillText(c.t[i].slice(0,10),Math.min(X(i),W-70),H-6)});
+ const line=(s,col)=>{g.beginPath();s.forEach((v,i)=>i?g.lineTo(X(i),Y(v)):g.moveTo(X(i),Y(v)));g.strokeStyle=col;g.lineWidth=1.6;g.stroke()};line(b,'#8aa09b');line(a,'#2ecc71');
+ if(hv!=null){g.strokeStyle='#4db8ff';g.beginPath();g.moveTo(X(hv),P.t);g.lineTo(X(hv),H-P.b);g.stroke();g.fillStyle='#e8f0ee';g.fillText(`${c.t[hv].slice(0,16)}  strategy ${Math.round(a[hv]).toLocaleString('en-IN')}  b&h ${Math.round(b[hv]).toLocaleString('en-IN')}`,P.l+6,P.t+12)}}
+document.addEventListener('mousemove',e=>{const cv=$('cv');if(!cv||!lastRes||e.target!==cv)return;const r=cv.getBoundingClientRect(),n=lastRes.curve.strat.length;draw(lastRes.curve,Math.max(0,Math.min(n-1,Math.round((e.clientX-r.left-66)/(r.width-76)*(n-1)))))});
+window.addEventListener('resize',()=>lastRes&&draw(lastRes.curve));
+async function detectServer(){try{const r=await fetch('/api/config',{headers:{Accept:'application/json'}});if(!r.ok)return;const j=await r.json();if(!j||j.server!==true)return;SRV=j;
+  SOURCES.crypto=[['srv:binance','Binance (live, via secure server)'],['srv:bybit','Bybit (live, via secure server)'],['csv','My CSV file']];
+  SOURCES.india=[...(j.dhan?[['srv:dhan','Dhan API (live, via secure server)']]:[]),['srv:yahoo','Yahoo Finance (live, via secure server)'],['csv','My CSV file']];
+  SRCNOTE['srv:dhan']='Live from Dhan through this site\'s server (the Dhan token never reaches your browser). If Dhan is down or its token expired, the server falls back to Yahoo and tells you.';
+  SRCNOTE['srv:yahoo']='Live from Yahoo Finance via the server. Yahoo allows only ~60 days of 5m/15m and ~2 years of 1h data.';
+  SRCNOTE['srv:binance']='Live from Binance via the server (falls back to its public mirror).';SRCNOTE['srv:bybit']='Live from Bybit via the server (linear USDT perpetual).';
+  if(j.ai)$('bAI').classList.remove('hide');fillSymbols($('symbol').value)}catch(e){}}
+function init(){$('ex').innerHTML=EXAMPLES.map(x=>`<span class="chip">${esc(x)}</span>`).join('');$('ex').onclick=e=>{if(e.target.classList.contains('chip')){$('prompt').value=e.target.textContent;doParse()}};fillSymbols();
+ $('libCards').innerHTML=LIBRARY.map((s,i)=>`<div class="card"><h2>${esc(s.name)}</h2>${s.tags.map(t=>`<span class="tag t">${esc(t)}</span>`).join('')}<p class="m">${esc(s.desc)}</p><button class="sec" data-i="${i}">Load into backtester</button></div>`).join('');
+ $('libCards').onclick=e=>{const i=e.target.dataset.i;if(i!=null){const s=LIBRARY[i];loadSpec(s.spec,s.interval)}};
+ $('failCards').innerHTML=FAILURES.map(f=>`<div class="card"><h2>#${f.id} ${esc(f.title)}</h2><div class="m" style="font-size:12px">${esc(f.market)} &middot; ${esc(f.strategy)}</div><div class="note bad" style="margin-top:8px"><b>What the numbers said:</b> ${esc(f.headline)}</div>${f.error_types.map(t=>`<span class="tag">${esc(t)}</span>`).join('')}<h3>What went wrong</h3><div>${esc(f.what_went_wrong)}</div><h3>Lesson</h3><div class="g">${esc(f.lesson)}</div><div class="status">Source: ${esc(f.source)} &middot; ${esc(f.status)}</div></div>`).join('');
+ const dh=DISCLAIMER.map(d=>`<h3>${esc(d[0])}</h3><div>${esc(d[1])}</div>`).join('');$('disc').innerHTML=dh;$('modalText').innerHTML=dh;
+ $('mist').innerHTML=MISTAKES.map(m=>`<div class="note info"><b>${esc(m[0])}.</b> ${esc(m[1])}</div>`).join('');
+ let ok=false;try{ok=localStorage.getItem('btl_ok2')==='1'}catch(e){}if(!ok)$('modal').style.display='flex';
+ $('agree').onchange=()=>{$('accept').disabled=!$('agree').checked};$('accept').onclick=()=>{try{localStorage.setItem('btl_ok2','1')}catch(e){}$('modal').style.display='none'}}
+init();detectServer();
+</script></body></html>
