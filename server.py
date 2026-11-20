@@ -346,7 +346,7 @@ def candles():
     except (TypeError, ValueError): days = 365
     key = (src, sym, iv, days); hit_ = cache_get(key)
     if hit_: return jsonify(hit_)
-    order = [src] + ([s for s in SOURCES[mk] if s != src] if mk == "india" else [])   # India: fall back Dhan -> Yahoo
+    order = [src] + [s for s in SOURCES[mk] if s != src]   # fall back: India Dhan->Yahoo, crypto Binance<->Bybit
     notes, last = [], "unknown"
     for s in order:
         if not daily("data", DATA_DAILY_CAP): return jsonify(error="Daily data limit reached on this server. Try tomorrow."), 429
@@ -355,6 +355,7 @@ def candles():
             rows = sorted({int(r[0]): [int(r[0])] + [float(x) for x in r[1:6]] for r in rows if all(x == x for x in r[1:6])}.values())
             if len(rows) < 60: raise DataError(f"only {len(rows)} bars")
             if s != src: notes.append(f"{src.title()} was unavailable ({last}); showing {s.title()} data instead.")
+            if s == "bybit" and mk == "crypto": notes.append("Bybit candles are USDT perpetual-futures prices, which differ slightly from spot.")
             out = dict(rows=rows, notes=notes + n, source=s, fetched_utc=datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M"))
             cache_put(key, out, 900 if iv == "1d" else 60); return jsonify(out)
         except DataError as e:
